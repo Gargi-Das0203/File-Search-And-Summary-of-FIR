@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIR Summary System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .upload-section input[type="file"] {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .search-section {
+            margin-bottom: 30px;
+        }
+        
+        .search-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-container input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-container input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .search-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            min-height: 200px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .result-header {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .summary-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+        
+        .summary-line {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e8f4fd;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        
+        .fir-info {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .status-bar {
+            background: #e9ecef;
+            padding: 10px 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .available-firs {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .fir-item {
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        
+        .fir-item:hover {
+            background: #e9ecef;
+        }
+        
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚔 FIR Summary System</h1>
+            <p>Upload FIR data and get instant two-line summaries</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-section">
+                <h3>📁 Upload FIR Data File</h3>
+                <p>Select your CSV file containing FIR numbers and contents</p>
+                <input type="file" id="fileInput" accept=".csv" />
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Choose CSV File
+                </button>
+                <div id="fileStatus" style="margin-top: 10px; font-weight: 600;"></div>
+            </div>
+            
+            <div class="search-section">
+                <label for="firInput">🔍 Search FIR by Number:</label>
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="firInput" 
+                        placeholder="Enter FIR number (e.g., 0124/2025)"
+                        disabled
+                    />
+                    <button class="search-btn" id="searchBtn" onclick="searchFIR()" disabled>
+                        Get Summary
+                    </button>
+                </div>
+                <button class="upload-btn" onclick="showAvailableFIRs()" id="showFIRsBtn" style="display:none;">
+                    📋 Show Available FIR Numbers
+                </button>
+            </div>
+            
+            <div class="result-section">
+                <div class="result-header">📄 FIR Summary Results</div>
+                <div id="resultContent">
+                    <p style="text-align: center; color: #6c757d; padding: 40px;">
+                        Please upload a CSV file and enter a FIR number to get the summary
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar" id="statusBar">
+            Ready - Please upload a CSV file with FIR data
+        </div>
+    </div>
+
+    <script>
+        let firData = [];
+        
+        // File upload handler
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const csv = e.target.result;
+                        firData = parseCSV(csv);
+                        
+                        document.getElementById('fileStatus').innerHTML = 
+                            `✅ <span style="color: #28a745;">${file.name} loaded (${firData.length} FIR records)</span>`;
+                        
+                        document.getElementById('firInput').disabled = false;
+                        document.getElementById('searchBtn').disabled = false;
+                        document.getElementById('showFIRsBtn').style.display = 'inline-block';
+                        
+                        updateStatus(`File loaded successfully - ${firData.length} FIR records available`);
+                    } catch (error) {
+                        document.getElementById('fileStatus').innerHTML = 
+                            `❌ <span style="color: #dc3545;">Error loading file: ${error.message}</span>`;
+                        updateStatus('Error loading file');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+        
+        // CSV parser
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = parseCSVLine(lines[i]);
+                    if (values.length >= 2) {
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = values[index] || '';
+                        });
+                        data.push(row);
+                    }
+                }
+            }
+            
+            return data;
+        }
+        
+        // Parse CSV line handling quotes and commas
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current.trim().replace(/"/g, ''));
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            values.push(current.trim().replace(/"/g, ''));
+            return values;
+        }
+        
+        // Search FIR function
+        function searchFIR() {
+            const firNumber = document.getElementById('firInput').value.trim();
+            if (!firNumber) {
+                alert('Please enter a FIR number');
+                return;
+            }
+            
+            if (firData.length === 0) {
+                alert('Please upload a FIR data file first');
+                return;
+            }
+            
+            // Find matching FIR
+            const match = firData.find(row => 
+                row.FIR_NUM && (
+                    row.FIR_NUM.toLowerCase().includes(firNumber.toLowerCase()) ||
+                    row.FIR_NUM.endsWith(firNumber)
+                )
+            );
+            
+            if (!match) {
+                document.getElementById('resultContent').innerHTML = `
+                    <div class="error-message">
+                        <strong>❌ FIR Number '${firNumber}' not found</strong><br>
+                        Please check the FIR number and try again.<br>
+                        Use 'Show Available FIR Numbers' to see all available FIRs.
+                    </div>
+                `;
+                updateStatus(`FIR ${firNumber} not found`);
+                return;
+            }
+            
+            // Generate summary
+            const summary = generateSummary(match.FIR_CONTENTS || '');
+            const timestamp = new Date().toLocaleString();
+            
+            document.getElementById('resultContent').innerHTML = `
+                <div class="fir-info">
+                    <strong>📋 FIR Number:</strong> ${match.FIR_NUM}<br>
+                    <strong>📅 Generated on:</strong> ${timestamp}
+                </div>
+                
+                <div class="summary-box">
+                    <h4 style="color: #2c3e50; margin-bottom: 15px;">📄 TWO-LINE SUMMARY:</h4>
+                    <div class="summary-line">
+                        <strong>1.</strong> ${summary.line1}
+                    </div>
+                    <div class="summary-line">
+                        <strong>2.</strong> ${summary.line2}
+                    </div>
+                </div>
+                
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <strong>💡 Tip:</strong> The summary above provides key information from the FIR.<br>
+                    For detailed information, please refer to the complete FIR document.
+                </div>
+            `;
+            
+            updateStatus(`Summary generated for FIR ${match.FIR_NUM}`);
+        }
+        
+        // Generate summary function
+        function generateSummary(content) {
+            if (!content) {
+                return {
+                    line1: "No content available for this FIR.",
+                    line2: "Please check the FIR number and try again."
+                };
+            }
+            
+            const lowerContent = content.toLowerCase();
+            
+            // Extract basic information
+            const info = extractInfo(content);
+            
+            // Determine case type and generate appropriate summary
+            if (lowerContent.includes('theft') || lowerContent.includes('stolen') || lowerContent.includes('steal')) {
+                return generateTheftSummary(info, content);
+            } else if (lowerContent.includes('accident') || lowerContent.includes('collision') || lowerContent.includes('dash')) {
+                return generateAccidentSummary(info, content);
+            } else if (lowerContent.includes('drunk') || lowerContent.includes('alcohol') || lowerContent.includes('bac')) {
+                return generateDrunkDrivingSummary(info, content);
+            } else if (lowerContent.includes('missing') || lowerContent.includes('fled') || lowerContent.includes('trace')) {
+                return generateMissingSummary(info, content);
+            } else if (lowerContent.includes('assault') || lowerContent.includes('attack') || lowerContent.includes('beat')) {
+                return generateAssaultSummary(info, content);
+            } else {
+                return generateGeneralSummary(info, content);
+            }
+        }
+        
+        // Extract information from content
+        function extractInfo(content) {
+            const info = {};
+            
+            // Extract date
+            const dateMatch = content.match(/on\s+(?:dt\.?|dated?)\s*(\d{1,2}[./]\d{1,2}[./]\d{2,4})/i);
+            info.date = dateMatch ? dateMatch[1] : 'unknown date';
+            
+            // Extract complainant
+            const complainantMatch = content.match(/[Cc]omplt?\.?\s+(?:Sri|Smt|Mr|Mrs|Ms)?\s*([A-Za-z\s]+)\s*\(/);
+            info.complainant = complainantMatch ? complainantMatch[1].trim().substring(0, 20) : 'complainant';
+            
+            // Extract location
+            const locationMatch = content.match(/(?:vill?\.?|village|PS|P\.S)[\s\-]*([A-Za-z\s]+)/i);
+            info.location = locationMatch ? locationMatch[1].trim().substring(0, 20) : 'unknown location';
+            
+            // Extract vehicle
+            const vehicleMatch = content.match(/(?:bearing|Regd?\.?\s*No\.?)\s*([A-Z]{2}[\-\s]?\d{2}[\-\s]?[A-Z]{1,2}[\-\s]?\d{1,5})/i);
+            info.vehicle = vehicleMatch ? vehicleMatch[1] : 'vehicle';
+            
+            // Extract accused
+            const accusedMatch = content.match(/(?:accused|rider|driver|culprit)[\s\w]*?([A-Z][a-z]+\s+[A-Z][a-z]+)/);
+            info.accused = accusedMatch ? accusedMatch[1].substring(0, 20) : 'accused person';
+            
+            return info;
+        }
+        
+        // Summary generators for different case types
+        function generateTheftSummary(info, content) {
+            const items = [];
+            if (content.toLowerCase().includes('motor') || content.toLowerCase().includes('m/c')) items.push('motorcycle');
+            if (content.toLowerCase().includes('mobile') || content.toLowerCase().includes('phone')) items.push('mobile phone');
+            if (content.toLowerCase().includes('cash') || content.toLowerCase().includes('money')) items.push('cash');
+            if (content.toLowerCase().includes('gold')) items.push('gold ornaments');
+            
+            const itemsText = items.length > 0 ? items.join(', ') : 'valuable items';
+            
+            return {
+                line1: `Theft case reported by ${info.complainant} on ${info.date} at ${info.location}.`,
+                line2: `Stolen items include ${itemsText} - case registered for investigation.`
+            };
+        }
+        
+        function generateAccidentSummary(info, content) {
+            return {
+                line1: `Road accident reported on ${info.date} at ${info.location} involving ${info.vehicle}.`,
+                line2: `Case registered for rash and negligent driving - investigation in progress.`
+            };
+        }
+        
+        function generateDrunkDrivingSummary(info, content) {
+            const bacMatch = content.match(/(\d+(?:\.\d+)?)\s*[Mm]g\/100\s*[Mm][Ll]/);
+            const bacLevel = bacMatch ? bacMatch[1] + 'mg/100ml' : 'elevated';
+            
+            return {
+                line1: `Drunk driving case against ${info.accused} on ${info.date} at ${info.location}.`,
+                line2: `BAC level: ${bacLevel}, ${info.vehicle} seized - legal action initiated.`
+            };
+        }
+        
+        function generateMissingSummary(info, content) {
+            const ageMatch = content.match(/(\d+)\s*(?:years?|yrs?|Yrs?)/);
+            const age = ageMatch ? ageMatch[1] + ' years' : 'unknown age';
+            
+            return {
+                line1: `Missing person case reported by ${info.complainant} on ${info.date} from ${info.location}.`,
+                line2: `Person aged ${age} went missing - search and investigation underway.`
+            };
+        }
+        
+        function generateAssaultSummary(info, content) {
+            return {
+                line1: `Assault case by ${info.complainant} against ${info.accused} on ${info.date} at ${info.location}.`,
+                line2: `Physical assault reported with injuries - case registered for investigation.`
+            };
+        }
+        
+        function generateGeneralSummary(info, content) {
+            return {
+                line1: `Case reported by ${info.complainant} on ${info.date} at ${info.location}.`,
+                line2: `Legal case registered - investigation assigned to concerned officer.`
+            };
+        }
+        
+        // Show available FIRs
+        function showAvailableFIRs() {
+            if (firData.length === 0) {
+                alert('Please upload a FIR data file first');
+                return;
+            }
+            
+            const firNumbers = firData.map(row => row.FIR_NUM).filter(num => num).sort();
+            
+            let firListHtml = '<div class="available-firs">';
+            firNumbers.forEach(fir => {
+                firListHtml += `<div class="fir-item" onclick="selectFIR('${fir}')">${fir}</div>`;
+            });
+            firListHtml += '</div>';
+            
+            document.getElementById('resultContent').innerHTML = `
+                <div class="result-header">📋 Available FIR Numbers (${firNumbers.length} total)</div>
+                <p>Click on any FIR number to select it:</p>
+                ${firListHtml}
+                <div style="margin-top: 15px; padding: 10px; background: #e8f4fd; border-radius: 5px;">
+                    <strong>💡 Tip:</strong> Click on any FIR number above to automatically search for its summary.
+                </div>
+            `;
+            
+            updateStatus(`Showing ${firNumbers.length} available FIR numbers`);
+        }
+        
+        // Select FIR from list
+        function selectFIR(firNumber) {
+            document.getElementById('firInput').value = firNumber;
+            searchFIR();
+        }
+        
+        // Update status bar
+        function updateStatus(message) {
+            document.getElementById('statusBar').textContent = message;
+        }
+        
+        // Allow Enter key to search
+        document.getElementById('firInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                searchFIR();
+            }
+        });
+    </script>
+</body>
+</html>
